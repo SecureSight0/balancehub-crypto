@@ -5,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface AuthModalProps {
   open: boolean;
@@ -14,14 +15,44 @@ interface AuthModalProps {
 
 const AuthModal = ({ open, onClose }: AuthModalProps) => {
   const [loading, setLoading] = useState(false);
+  const [partnerCode, setPartnerCode] = useState("");
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // TODO: Implement authentication
-    setTimeout(() => {
-      setLoading(false);
-    }, 1500);
+
+    if ((e.target as HTMLFormElement).id === 'register-form') {
+      // Check partner code for registration
+      if (partnerCode !== "007") {
+        toast({
+          title: "Invalid Partner Code",
+          description: "Please enter a valid partner code to register.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      
+      // Simulate successful registration
+      setTimeout(() => {
+        toast({
+          title: "Registration Successful",
+          description: "Welcome to BalanceHub!",
+        });
+        setLoading(false);
+        onClose();
+        navigate("/dashboard");
+      }, 1500);
+    } else {
+      // Handle login
+      setTimeout(() => {
+        setLoading(false);
+        onClose();
+        navigate("/dashboard");
+      }, 1500);
+    }
   };
 
   return (
@@ -53,7 +84,7 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
               </form>
             </TabsContent>
             <TabsContent value="register">
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form id="register-form" onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="register-email">Email</Label>
                   <Input id="register-email" type="email" required />
@@ -65,6 +96,16 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password">Confirm Password</Label>
                   <Input id="confirm-password" type="password" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="partner-code">Partner Code</Label>
+                  <Input 
+                    id="partner-code" 
+                    type="text" 
+                    value={partnerCode}
+                    onChange={(e) => setPartnerCode(e.target.value)}
+                    required 
+                  />
                 </div>
                 <Button 
                   type="submit" 
